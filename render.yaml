@@ -1,0 +1,18 @@
+# Render blueprint — one-click deploy for the Waybill web service.
+# Secrets (WAYBILL_SIGNING_KEY_SEED, WAYBILL_LLM_API_KEY) are set in the
+# Render dashboard, never in this file.
+services:
+  - type: web
+    name: waybill
+    runtime: python
+    plan: free
+    buildCommand: pip install .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.9"
+      - key: WAYBILL_SIGNING_KEY_SEED
+        sync: false # set in dashboard — required for signatures to survive restarts
+      - key: WAYBILL_LLM_API_KEY
+        sync: false # set in dashboard — optional, enables the semantic check

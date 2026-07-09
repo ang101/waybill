@@ -1,0 +1,15 @@
+# Secrets — NEVER commit. Keys go in the host's dashboard env vars only.
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+plan.md

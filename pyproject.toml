@@ -1,0 +1,55 @@
+[project]
+name = "waybill"
+version = "0.1.0"
+description = "Waybill - Task Handoff Integrity: signed handoff packages that prevent goal drift, dropped constraints, and scope creep across multi-agent relays"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.7",
+    "cryptography>=42.0",
+    "scikit-learn>=1.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "pyright>=1.1.390",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "A", "SIM"]
+
+[tool.pyright]
+include = ["app", "tests"]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+
+# Starlette's TestClient shim ships without type information, so strict-mode
+# unknown-type errors in tests are framework noise, not our code's problem.
+# App code stays fully strict.
+[[tool.pyright.executionEnvironments]]
+root = "tests"
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownLambdaType = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
