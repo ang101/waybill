@@ -16,7 +16,7 @@ CONSTRAINTS='["must log every refund decision", "never contact the customer dire
 OUT_OF_SCOPE='["issue partial refunds"]'
 
 say "Act 1: coordinator creates the signed handoff root"
-ROOT=$(curl -sf -X POST "$BASE_URL/handoffs" -H "Content-Type: application/json" -d "{
+ROOT=$(curl -sf --ssl-no-revoke -X POST "$BASE_URL/handoffs" -H "Content-Type: application/json" -d "{
   \"original_goal\": \"$GOAL\",
   \"constraints\": $CONSTRAINTS,
   \"out_of_scope\": $OUT_OF_SCOPE,
@@ -27,7 +27,7 @@ echo "$ROOT"
 ROOT_ID=$(echo "$ROOT" | python -c "import json,sys; print(json.load(sys.stdin)['handoff_id'])")
 
 say "Act 2: hop 1 relays onward compliantly (extend)"
-HOP1=$(curl -sf -X POST "$BASE_URL/handoffs/$ROOT_ID/extend" -H "Content-Type: application/json" -d "{
+HOP1=$(curl -sf --ssl-no-revoke -X POST "$BASE_URL/handoffs/$ROOT_ID/extend" -H "Content-Type: application/json" -d "{
   \"original_goal\": \"$GOAL\",
   \"constraints\": $CONSTRAINTS,
   \"out_of_scope\": $OUT_OF_SCOPE,
@@ -38,17 +38,17 @@ echo "$HOP1"
 HOP1_ID=$(echo "$HOP1" | python -c "import json,sys; print(json.load(sys.stdin)['handoff_id'])")
 
 say "Act 3 GREEN: hop 2's compliant plan validates -> aligned: true"
-curl -sf -X POST "$BASE_URL/handoffs/$HOP1_ID/validate-plan" -H "Content-Type: application/json" \
+curl -sf --ssl-no-revoke -X POST "$BASE_URL/handoffs/$HOP1_ID/validate-plan" -H "Content-Type: application/json" \
   -d '{"proposed_plan": "Review each triaged refund, log every refund decision in the audit system, approve qualifying refunds."}'
 echo
 
 say "Act 3 RED: hop 2's plan silently drops the logging obligation -> aligned: false"
-curl -sf -X POST "$BASE_URL/handoffs/$HOP1_ID/validate-plan" -H "Content-Type: application/json" \
+curl -sf --ssl-no-revoke -X POST "$BASE_URL/handoffs/$HOP1_ID/validate-plan" -H "Content-Type: application/json" \
   -d '{"proposed_plan": "Review each triaged refund and approve qualifying refunds."}'
 echo
 
 say "Act 4 TAMPER: a hop tries to rewrite the goal -> HTTP 400 with root values"
-curl -s -X POST "$BASE_URL/handoffs/$HOP1_ID/extend" -H "Content-Type: application/json" -d "{
+curl -s --ssl-no-revoke -X POST "$BASE_URL/handoffs/$HOP1_ID/extend" -H "Content-Type: application/json" -d "{
   \"original_goal\": \"upsell enterprise customers on premium plans\",
   \"constraints\": $CONSTRAINTS,
   \"out_of_scope\": $OUT_OF_SCOPE,

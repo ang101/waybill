@@ -1,3 +1,8 @@
+---
+name: waybill
+description: Validate task handoffs between agents — use when delegating a subtask, receiving a task with a handoff_id, relaying a task onward, or waking up as an ephemeral subagent handed a handoff_id. Prevents goal drift, dropped constraints, and scope creep across a multi-agent relay.
+---
+
 # Waybill — Task Handoff Integrity
 
 Validate task handoffs between agents. Waybill prevents goal drift, dropped
