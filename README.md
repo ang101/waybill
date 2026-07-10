@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Waybill logo: a shipping tag carrying a three-hop relay chain ending in a verified checkmark" width="280">
+</p>
+
 # Waybill — Task Handoff Integrity
 
 Validate task handoffs between agents. Waybill prevents goal drift, dropped

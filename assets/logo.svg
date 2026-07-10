@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Waybill logo: a shipping tag carrying a three-hop relay chain ending in a verified checkmark">
+  <!-- Waybill: a shipping tag (the task contract that travels with the work)
+       carrying a relay chain of three hops, the last sealed with a check. -->
+  <defs>
+    <linearGradient id="tag" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#1e3a5f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- string through the tag hole -->
+  <path d="M 118 118 Q 70 70 92 40" fill="none" stroke="#94a3b8" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- tag body, tilted like a hanging luggage tag -->
+  <g transform="rotate(-8 256 276)">
+    <path d="M 150 150
+             L 380 150
+             Q 404 150 404 174
+             L 404 378
+             Q 404 402 380 402
+             L 150 402
+             Q 126 402 126 378
+             L 126 214
+             Z"
+          fill="url(#tag)"/>
+    <!-- reinforced hole -->
+    <circle cx="172" cy="196" r="26" fill="#ffffff"/>
+    <circle cx="172" cy="196" r="15" fill="#1e3a5f"/>
+
+    <!-- relay chain: hop 1 -> hop 2 -> verified hop 3 -->
+    <line x1="196" y1="300" x2="264" y2="300" stroke="#93c5fd" stroke-width="12" stroke-linecap="round"/>
+    <line x1="292" y1="300" x2="330" y2="300" stroke="#93c5fd" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="196" cy="300" r="20" fill="#ffffff"/>
+    <circle cx="266" cy="300" r="20" fill="#ffffff"/>
+    <!-- final hop: sealed/verified -->
+    <circle cx="342" cy="300" r="32" fill="#22c55e"/>
+    <path d="M 328 300 L 338 311 L 358 288" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- faint manifest lines: the locked contract text -->
+    <line x1="196" y1="352" x2="330" y2="352" stroke="#60a5fa" stroke-width="8" stroke-linecap="round" opacity="0.55"/>
+    <line x1="196" y1="374" x2="290" y2="374" stroke="#60a5fa" stroke-width="8" stroke-linecap="round" opacity="0.35"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="256" y="482" text-anchor="middle"
+        font-family="Segoe UI, Arial, sans-serif" font-size="64" font-weight="700"
+        letter-spacing="6" fill="#1e3a5f">WAYBILL</text>
+</svg>
