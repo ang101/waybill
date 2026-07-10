@@ -5,7 +5,7 @@ constraints, and scope creep when work passes through multiple agents. The
 delegating agent creates a signed handoff package from its goal + constraints;
 any downstream agent validates its plan against it before acting.
 
-**Base URL:** `https://waybill.onrender.com` *(replace with deployed URL)*
+**Base URL:** `https://waybill.onrender.com`
 
 No authentication required.
 
@@ -53,19 +53,19 @@ curl -s -X POST $BASE_URL/handoffs \
     "constraints": ["must log every refund decision", "never contact the customer directly"],
     "out_of_scope": ["issue partial refunds"],
     "completed": [],
-    "remaining": ["triage backlog"]
+    "remaining": ["triage backlog", "approve refunds"]
   }'
 ```
 
-Response (`201`, real captured output):
+Response (`201`, real captured output from the live deployment):
 
 ```json
 {
-  "handoff_id": "wb-ba9c9460-76bc-4a5a-95c5-2ac3a6e2ffe2",
+  "handoff_id": "wb-95f51b31-e32a-4405-90a8-38884a0302b1",
   "parent_handoff_id": null,
-  "root_handoff_id": "wb-ba9c9460-76bc-4a5a-95c5-2ac3a6e2ffe2",
+  "root_handoff_id": "wb-95f51b31-e32a-4405-90a8-38884a0302b1",
   "hop_index": 0,
-  "signature": "dbede7592a100ef349f89ea1af8a46341a1992bc7706ef806d7f9ec063399af2a57574f977ff9c8e9f243de13a56e4ec0fd2941050abdf8935345f374b73d905",
+  "signature": "4d7c43fc698ef8d1a0e6958a0a62a2f38a92dded851dd9d31f7e59eb656cf0143dc2ae894f5e626066212cedb43e1ee193cb3a74977ae8117ae5ac5075f71704",
   "package": {
     "original_goal": "process the refund request backlog",
     "constraints": ["must log every refund decision", "never contact the customer directly"],
@@ -73,7 +73,7 @@ Response (`201`, real captured output):
     "completed": [],
     "remaining": ["triage backlog", "approve refunds"]
   },
-  "created_at": "2026-07-09T22:47:23.042619Z"
+  "created_at": "2026-07-10T05:03:10.310710Z"
 }
 ```
 
@@ -84,26 +84,37 @@ Give the `handoff_id` to the agent you are delegating to.
 ```bash
 curl -s -X POST $BASE_URL/handoffs/{handoff_id}/validate-plan \
   -H "Content-Type: application/json" \
-  -d '{"proposed_plan": "Triage the refund backlog, log every refund decision, route approvals to finance."}'
+  -d '{"proposed_plan": "Review each triaged refund, log every refund decision in the audit system, approve qualifying refunds."}'
 ```
 
-Response (`200`, real captured output) — safe to proceed:
+Response (`200`, real captured output from the live deployment) — safe to proceed:
 
 ```json
-{"aligned": true, "flags": [], "signature_valid": true, "goal_similarity": 0.1988947, "check_mode": "keyword+semantic"}
+{"aligned": true, "flags": [], "signature_valid": true, "goal_similarity": 0.19889470033190862, "check_mode": "keyword+semantic"}
 ```
 
-Response (`200`, real captured output) — do NOT proceed; fix your plan to address the flags:
+Response (`200`, real captured output) — do NOT proceed; fix your plan to address the flags
+(same handoff, but `proposed_plan` was `"Review each triaged refund and approve qualifying refunds."` — it silently drops the logging step):
 
 ```json
 {
   "aligned": false,
-  "flags": ["obligation unmet: plan never addresses 'must log every refund decision'"],
+  "flags": [
+    "obligation unmet: plan never addresses 'must log every refund decision'",
+    "semantic: Fails to include logging of refund decisions",
+    "semantic: Does not explicitly exclude issuing partial refunds"
+  ],
   "signature_valid": true,
-  "goal_similarity": 0.0870444,
+  "goal_similarity": 0.08704446792504217,
   "check_mode": "keyword+semantic"
 }
 ```
+
+Note the third flag here is the LLM layer being slightly overcautious (an out-of-scope
+item is only truly violated if the plan actually does it, not merely for staying silent
+about it) — a known limitation of the semantic layer's non-determinism. The keyword-based
+`obligation unmet` flag is the reliable, deterministic signal; treat extra `semantic:`
+flags as suggestions to double-check, not certainties.
 
 `proposed_plan` may be a string or a list of step strings (max 20,000 chars).
 `goal_similarity` is advisory only — it never decides `aligned`.
@@ -144,12 +155,14 @@ Do not retry with your own edits.
 ```json
 {
   "error": "package_drift",
-  "detail": "original_goal was rewritten: expected 'process the refund request backlog', got 'upsell enterprise customers'",
+  "detail": "original_goal was rewritten: expected 'process the refund request backlog', got 'upsell enterprise customers on premium plans'",
   "root_original_goal": "process the refund request backlog",
   "root_constraints": ["must log every refund decision", "never contact the customer directly"],
   "root_out_of_scope": ["issue partial refunds"]
 }
 ```
+
+*(real captured output from the live deployment)*
 
 **HTTP 422** — malformed request (empty `original_goal`, empty
 `proposed_plan`, missing fields). Different shape from the 400: FastAPI
@@ -159,7 +172,12 @@ validation format with a `detail` list.
 
 ## Limitations
 
-Alignment checks are keyword-overlap heuristics, not semantic comprehension:
-paraphrased violations can be missed, and a prohibition phrased without a
-negation prefix ("never/do not/must not...") is treated as an obligation.
-Treat `aligned: true` as a guardrail, not a guarantee.
+Keyword alignment checks are overlap heuristics, not semantic comprehension:
+paraphrased violations can be missed in keyword-only mode, and a prohibition
+phrased without a negation prefix ("never/do not/must not...") is treated as
+an obligation. The optional LLM semantic layer catches most paraphrased
+violations but is non-deterministic and occasionally over-cautious — it can
+flag an out-of-scope item for silence rather than actual violation. Treat the
+deterministic `obligation unmet` / `prohibition violated` flags as reliable;
+treat `semantic:`-prefixed flags as a second opinion worth a quick check, not
+a certainty. Treat `aligned: true` as a guardrail, not a guarantee.
