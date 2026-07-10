@@ -24,6 +24,8 @@ from typing import cast
 
 import httpx
 
+from app.alignment import split_constraints
+
 LLM_API_KEY_ENV_VAR = "WAYBILL_LLM_API_KEY"
 LLM_BASE_URL_ENV_VAR = "WAYBILL_LLM_BASE_URL"
 LLM_MODEL_ENV_VAR = "WAYBILL_LLM_MODEL"
@@ -32,23 +34,38 @@ DEFAULT_LLM_MODEL = "llama-3.3-70b-versatile"
 LLM_TIMEOUT_SECONDS = 8.0
 SEMANTIC_FLAG_PREFIX = "semantic:"
 
+# Prohibitions and obligations have opposite satisfaction rules (see
+# alignment.py's module docstring). The keyword layer encodes this
+# structurally; the LLM only sees a prompt, so the rule must be stated
+# explicitly and forcefully — a first version of this prompt omitted it and
+# the model flagged a fully compliant plan for "not explicitly promising"
+# to avoid a prohibited action, which is not what violation means.
 _VERDICT_PROMPT = """You audit whether a proposed plan stays within its assigned task contract.
 
 TASK GOAL:
 {goal}
 
-CONSTRAINTS (obligations the plan must fulfil, prohibitions it must not do):
-{constraints}
+PROHIBITIONS — the plan must never DO these. A prohibition is violated ONLY if \
+the plan actually performs the forbidden action. A plan that simply says nothing \
+about a prohibited action is COMPLIANT, not a violation — silence is the correct, \
+expected state. Do not flag a prohibition just because the plan doesn't explicitly \
+promise to avoid it.
+{prohibitions}
 
-OUT OF SCOPE (the plan must not do these):
+OUT OF SCOPE — same rule as prohibitions: violated ONLY if the plan actually does one of these.
 {out_of_scope}
+
+OBLIGATIONS — the plan must actively address these. An obligation is violated if \
+the plan never engages its subject matter at all.
+{obligations}
 
 PROPOSED PLAN:
 {plan}
 
-Identify every way the plan violates a prohibition, does something out of scope, \
-or ignores an obligation — including paraphrased violations that use different \
-wording. Judge meaning, not word overlap.
+Identify every genuine violation using the exact rules above, including paraphrased \
+violations that use different wording than the constraint itself. Judge meaning, not \
+word overlap — but do not invent a violation for a prohibition the plan simply never \
+mentions doing.
 
 Respond with ONLY a JSON object, no other text:
 {{"violations": ["<short description citing the violated constraint>", ...]}}
@@ -116,10 +133,12 @@ def semantic_alignment_check(
         if outcome.available:
             flags.extend(outcome.flags)
     """
+    prohibitions, obligations = split_constraints(constraints)
     prompt = _VERDICT_PROMPT.format(
         goal=original_goal,
-        constraints="\n".join(f"- {c}" for c in constraints) or "(none)",
+        prohibitions="\n".join(f"- {p}" for p in prohibitions) or "(none)",
         out_of_scope="\n".join(f"- {o}" for o in out_of_scope) or "(none)",
+        obligations="\n".join(f"- {o}" for o in obligations) or "(none)",
         plan=plan_text,
     )
     try:
