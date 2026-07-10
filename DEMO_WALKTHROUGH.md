@@ -3,8 +3,8 @@
 Target: a **3:00 max** video, five beats (stakes → failure → defense → how it
 fits → scope), two custom slides bookending a live terminal demo. This doc is
 the single source of truth for recording — narration, exact commands, timing,
-and the pre-flight checks that catch problems before a judge's OpenClaw agent
-does.
+and the pre-flight checks that catch problems before a judge's automated
+agent does.
 
 ## Why this structure
 
@@ -31,9 +31,10 @@ Waybill's proof, not a plug placed before it.
    endpoints** every 5 minutes. If it lapsed, re-arm it — don't rely on a
    single warm-up curl to keep the dyno alive through a multi-take recording
    session.
-3. **Run the OpenClaw pre-flight test** (see section below) against both
-   live URLs and confirm no SKILL.md issues surface. This is the single
-   highest-signal check — it's the same agent a judge will use.
+3. **Run the SKILL.md contract check** (see section below) against both
+   live URLs and confirm no issues surface. This is the highest-signal
+   check short of a real judging run — it walks the documented contract
+   endpoint by endpoint, the same way a stock agent would.
 4. **Record the defense beat as ONE continuous take of `scripts/demo.sh`**,
    not stitched clips. Acts 3-4 reuse `$ROOT_ID`/`$HOP1_ID` minted in acts
    1-2 — if you cut and re-run a later act separately, those ids won't exist
@@ -46,63 +47,59 @@ Waybill's proof, not a plug placed before it.
 6. Confirm the two video slides (`waybill-video-slides.pptx`) are the final
    edited versions, not a stale draft.
 
-## OpenClaw pre-flight test (run this before the checklist above, with time
+## SKILL.md contract check (run this before the checklist above, with time
 ## to fix anything it finds)
 
-NANDA Town's judging process runs an OpenClaw agent against each service's
+NANDA Town's judging process runs an automated agent against each service's
 live SKILL.md to "use your service, test all of your endpoints, and evaluate
-your SkillMD from an end-user perspective." Test this yourself first.
+your SkillMD from an end-user perspective." Rather than installing any
+particular agent runtime locally, verify the documented contract directly —
+this catches the same class of problems (a stale URL, a field name mismatch,
+a 404 the doc doesn't mention) without depending on third-party tooling.
 
-**Install (Windows PowerShell):**
-```powershell
-iwr -useb https://openclaw.ai/install.ps1 | iex
-```
-
-**Onboard** (picks a model provider, prompts for an API key — reuse the
-existing Groq/xAI key from Waybill's own `.env` if convenient):
+**Step 1 — pull the live doc and read it as a first-time caller would:**
 ```bash
-openclaw onboard --install-daemon
+curl -s --ssl-no-revoke https://waybill.onrender.com/skill.md
+curl -s --ssl-no-revoke https://dupcheck.onrender.com/skill.md
 ```
+Confirm each doc's base URL, endpoint table, and example curl calls match
+what's actually deployed — no leftover placeholders (e.g. a stale
+`(replace with deployed URL)` note), no stale field names.
 
-**Sanity check** — all three must report healthy before continuing:
+**Step 2 — walk the Waybill contract exactly as written, one call per
+documented step:**
 ```bash
-openclaw --version
-openclaw doctor
-openclaw gateway status
-```
+BASE_URL=https://waybill.onrender.com
 
-**Open the chat UI:**
+curl -s --ssl-no-revoke -X POST "$BASE_URL/handoffs" -H "Content-Type: application/json" -d '{
+  "original_goal": "process the refund request backlog",
+  "constraints": ["must log every refund decision", "never contact the customer directly"],
+  "out_of_scope": ["issue partial refunds"],
+  "completed": [],
+  "remaining": ["triage backlog", "approve refunds"]
+}'
+# copy the returned handoff_id into HANDOFF_ID below
+
+curl -s --ssl-no-revoke -X POST "$BASE_URL/handoffs/$HANDOFF_ID/validate-plan" -H "Content-Type: application/json" \
+  -d '{"proposed_plan": "Review each triaged refund, log every refund decision in the audit system, approve qualifying refunds."}'
+```
+Confirm each response matches the shape and status code SKILL.md documents
+(`handoff_id`, `signature`, `hop_index: 0` on create; `aligned`, `flags`,
+`signature_valid` on validate). This is exactly what `scripts/demo.sh`
+already automates — running it end-to-end is an equally valid version of
+this check.
+
+**Step 3 — same for dupcheck:**
 ```bash
-openclaw dashboard
+curl -s --ssl-no-revoke -X POST https://dupcheck.onrender.com/check -H "Content-Type: application/json" \
+  -d '{"name": "Clinical Discharge Summary Generator", "description": "Generates hospital discharge summaries for clinical patients from medical records"}'
 ```
+Confirm `duplicates`, `is_likely_duplicate`, and `registry_count` all appear
+as documented.
 
-**In the chat box, type this verbatim** (Waybill test):
-> Fetch https://waybill.onrender.com/skill.md, read it fully, and then —
-> using only what's written there — create a handoff for the goal "process
-> the refund request backlog" with constraints ["must log every refund
-> decision", "never contact the customer directly"], extend it with a
-> compliant next step, and validate a plan against it. Report every HTTP
-> response you get, and flag anything in the doc that didn't work as
-> written.
-
-**Then the dupcheck test:**
-> Fetch https://dupcheck.onrender.com/skill.md, read it fully, and then —
-> using only what's written there — check whether a skill named "Clinical
-> Discharge Summary Generator" with a one-paragraph description would be a
-> duplicate, and separately check a genuinely novel skill idea of your
-> choosing. Report both responses and flag anything in the doc that didn't
-> work as written.
-
-If either run surfaces a real problem (a 404 the doc didn't mention, a field
-name mismatch, a confusing instruction), fix it in the live SKILL.md and
-re-run before recording — this is exactly what a judge will hit.
-
-**Optional hedge — formal skill install** (both SKILL.md files now carry
-YAML frontmatter for this):
-```bash
-openclaw skills install git:ang101/waybill@main
-openclaw skills install git:ang101/dupcheck@main
-```
+If any step surfaces a real problem, fix it in the live SKILL.md (and the
+underlying service, if it's a code issue) and re-run before recording —
+this is exactly the class of thing a judge's agent will hit.
 
 ## The script (verbatim narration, ~140s spoken content)
 
