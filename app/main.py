@@ -34,12 +34,34 @@ from app.signing import ServiceSigningKey
 from app.storage import HandoffStore, StoredHandoff
 
 SKILL_MD_PATH = Path(__file__).resolve().parent.parent / "SKILL.md"
+DOTENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 SIGNING_SEED_ENV_VAR = "WAYBILL_SIGNING_KEY_SEED"
 MAX_PLAN_LENGTH_CHARS = 20_000
 """Upper bound on plan text — keeps a public endpoint from being abused to
 burn the free-tier LLM quota with giant payloads."""
 
 logger = logging.getLogger("waybill")
+
+
+def _load_dotenv_if_present() -> None:
+    """Load KEY=VALUE lines from a local ``.env`` into the environment.
+
+    Local-dev convenience only — Render supplies real env vars via its
+    dashboard. Deliberately minimal (no quoting/expansion) rather than a
+    python-dotenv dependency; already-set variables always win so a real
+    environment can never be overridden by a stale file.
+    """
+    if not DOTENV_PATH.exists():
+        return
+    for line in DOTENV_PATH.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        name, _, value = stripped.partition("=")
+        os.environ.setdefault(name.strip(), value.strip())
+
+
+_load_dotenv_if_present()
 
 app = FastAPI(
     title="Waybill — Task Handoff Integrity",
