@@ -114,7 +114,7 @@ until its prerequisite step has completed, so you click through at your
 own narration pace instead of a script auto-firing everything. A red
 `aligned: false` flag prefixed `semantic:` (the LLM layer's catch) renders
 as a distinct **amber** chip, separate from the plain keyword-flag chips —
-that's the visual moment from Act 4 that terminal output couldn't make
+that's the visual moment from Panel 4 that terminal output couldn't make
 legible.
 
 **To run it**: open a terminal in `waybill/demo/`, start a trivial local
@@ -176,7 +176,7 @@ narrated:
 > just runs."
 
 The plan text to show: `Review each triaged refund and approve qualifying
-refunds.` — this is the exact plan reused in the Defense beat's Act 4 panel,
+refunds.` — this is the exact plan reused in the Defense beat's Panel 4,
 deliberately, for the before/after. The `echo` line is an obvious narrated
 stand-in for "no check exists," not a real competing system — it turns the
 claim into something the viewer watches happen.
