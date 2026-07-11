@@ -155,8 +155,8 @@ long, this is the beat to trim first.
 > "Multi-agent systems are supposed to hand off cleanly. But when a task
 > passes from one agent to the next, nothing checks that the goal and
 > constraints actually survived the handoff. Recent research on multi-agent
-> drift found problem drift in up to 89% of extended agent exchanges — the
-> meaning quietly erodes, hop by hop."
+> drift found problem drift in 76 to 89 percent of extended agent exchanges
+> — the meaning quietly erodes, hop by hop."
 
 *(cut to terminal)*
 
@@ -245,6 +245,99 @@ the Q&A crib sheet below, already covered there)*
 > under ang101. Two tools, one thesis: a growing agent town needs hygiene
 > infrastructure that scales past manual review."
 
+## Word-for-word script (co-founder voice, read straight through)
+
+The beat-by-beat breakdown above is the production reference — timing,
+camera cues, fallbacks. This is the same content stitched into one
+continuous script, written to be read aloud start to finish, first person,
+the way a co-founder would actually present it to judges. Bracketed cues
+are stage directions, not spoken words.
+
+> Hi, I'm Angela — this is Waybill.
+>
+> Multi-agent systems are supposed to hand off cleanly. But when a task
+> passes from one agent to the next, nothing checks that the goal and
+> constraints actually survived the handoff. Recent research on
+> multi-agent drift found problem drift in 76 to 89 percent of extended
+> agent exchanges — the meaning quietly erodes, hop by hop.
+>
+> [cut to the demo UI]
+>
+> Here's a real handoff: a refund-processing task with two constraints —
+> log every decision, and never contact the customer directly. Say an
+> agent two hops downstream proposes this plan: [show plan text] "Review
+> each triaged refund and approve qualifying refunds." It never mentions
+> logging. Watch what happens with no check in place. [type and run:
+> `echo "Plan approved. Task marked complete."`] Nothing catches it. It
+> just runs.
+>
+> This is Waybill. The coordinator creates a signed handoff — goal,
+> constraints, out-of-scope — as a real API call. [click Panel 1] Hop one
+> extends it — goal and constraints carry forward untouched. [click Panel
+> 2] Now the compliant plan: validate returns aligned, true. [click Panel
+> 3] But the same plan from a minute ago — validate that against Waybill.
+> [click Panel 4] Caught — not aligned, and the LLM layer caught it too,
+> that amber flag. And if a hop tries to rewrite the goal entirely instead
+> of relaying it, Waybill rejects it outright: HTTP 400, with the real
+> root values returned so the caller can self-correct. [click Panel 5]
+>
+> Waybill builds on nothing exotic — the same skill.md and HTTP convention
+> every town skill already uses. What's new is what other agents can rely
+> on: any orchestrator can GET this contract and validate before acting.
+> Its sibling, the Duplicate-Skill Checker, applies the same idea to the
+> registry. [click Panel 6] I typed a made-up name, "TaskGuard Preflight,"
+> and it still caught two real matches, AgentCheckpoint and AgentGate,
+> purely on function, via TF-IDF — lightweight, no embeddings model,
+> free-tier friendly. We needed this ourselves: our own Step 1 PR was
+> closed as a duplicate we didn't know existed.
+>
+> One honest limit: the signature proves content wasn't tampered with, not
+> who authored it — per-agent identity is the roadmap item, not a hidden
+> gap.
+>
+> Waybill and the Duplicate-Skill Checker are both live right now —
+> waybill.onrender.com and dupcheck.onrender.com, full source on GitHub
+> under ang101. Two tools, one thesis: a growing agent town needs hygiene
+> infrastructure that scales past manual review. Thank you.
+
+## Five hardest judge questions — one-sentence pivots
+
+Written as if a skeptical judge is actively trying to poke holes —
+implementation, tech stack, and business viability. Each answer is one
+sentence, framing the real limitation as a deliberate choice or a named
+next step, not a dodge. The longer Q&A crib sheet below has more room to
+elaborate if a follow-up needs it.
+
+1. **"Your Ed25519 signature is service-held, not per-agent — isn't that
+   just a checksum dressed up as trust?"**
+   → It's intentionally scoped to prove content integrity, not agent
+   identity — real per-agent authentication is the next layer we build on
+   top of this tamper-evident base, not a gap we're hoping you miss.
+2. **"What actually stops an agent from ignoring `aligned: false` and
+   acting anyway?"**
+   → Nothing today, by design — Waybill ships the validation signal
+   first, the same way a linter ships before a pre-commit hook, with an
+   enforcement/proxy mode as the deliberate next step once that signal is
+   proven.
+3. **"TF-IDF is decades-old lexical matching — why not embeddings,
+   especially when your own evidence is about paraphrase-level drift?"**
+   → TF-IDF is the deterministic, zero-dependency floor by design, chosen
+   so both services stay free and rate-limit-free for every judge testing
+   them tonight, and it's isolated behind one function specifically so
+   swapping in embeddings later is a config change, not a rewrite.
+4. **"Your storage is in-memory on a free Render dyno — doesn't your
+   whole demo state disappear on any restart?"**
+   → Yes, and it's a disclosed hackathon-scope tradeoff, not an
+   oversight — the storage layer's method signatures were designed so
+   dropping in SQLite or Postgres for production durability is a swap,
+   not a redesign.
+5. **"Both services are free with no revenue and an unproven pricing
+   analogy — what's the actual business case?"**
+   → The model mirrors fraud-scoring APIs like Stripe Radar on purpose —
+   thin per-validation pricing sitting in a path agents already call —
+   and tonight's free deployment is the pilot proving the signal, not the
+   product, exactly how every fraud-scoring API started.
+
 ## The registry gap Waybill fills
 
 *(supporting talking-point content — not part of the timed 3:00 demo,
@@ -315,15 +408,6 @@ semantically, at every hop."
   similarity engine design (TF-IDF, isolated behind one function) and the
   same thesis: verify before you act, verify before you build.
 
-## Worth knowing for Q&A
-
-*(not part of the demo — a caveat to have ready, not to bring up
-unprompted)*
-
-Be ready for the honest caveat baked into your own plan: the Ed25519
-signature is service-held, not per-agent, so it proves content wasn't
-tampered with in storage/transit — not cross-agent authentication. A sharp
-judge who knows PKI may probe this; the honest answer is that per-agent
-signing is roadmap, and the current design is closer to a verifiable
-checksum than a trust protocol — which is exactly why it's positioned as
-complementary to AgentPass, not competing with it.
+*(The signature/PKI caveat — service-held not per-agent, positioned as
+complementary to AgentPass rather than competing with it — is question 1
+in the "Five hardest judge questions" section above; not repeated here.)*
