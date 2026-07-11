@@ -3,6 +3,14 @@
 
 ---
 
+**In one sentence**: create a signed handoff package from your goal and
+constraints; every downstream agent must validate its plan against that
+package before acting — turning "hope the task didn't get paraphrased into
+something else" into "verify it didn't, cryptographically and semantically,
+at every hop."
+
+---
+
 ## The problem: task telephone
 
 When Agent A hands a task to Agent B as free text, meaning decays at every
@@ -145,3 +153,15 @@ the task layer.
   flag (enforcement webhooks are future work).
 
 See [README.md](README.md#future-work) for the full future-work roadmap.
+
+---
+
+## Companion project
+
+Built alongside **[Duplicate-Skill Checker](https://github.com/ang101/dupcheck)**:
+Waybill keeps *tasks* from silently mutating as they pass between agents;
+its sibling keeps the *registry* from silently accumulating near-identical
+skills — including for orchestrator agents deciding whether to author a
+brand-new skill for a subtask instead of delegating to one that already
+exists. Two sides of the same thesis — a growing agent town needs hygiene
+infrastructure that scales past manual review.

@@ -122,3 +122,11 @@ hop to hop, never widen or silently rewrite** — and an invalidated root
 cleanly invalidates everything derived from it. See the companion NANDA Town
 Step 1 PR (`hackathon/ang101-capability-delegation`): delegatable capability
 tokens with cascading revocation.
+
+## Companion project
+
+Built alongside **[Duplicate-Skill Checker](https://github.com/ang101/dupcheck)**
+for the NANDA Town hackathon: Waybill keeps *tasks* from silently mutating
+as they pass between agents; this tool keeps the *registry* from silently
+accumulating near-identical skills. Both are hygiene infrastructure for a
+town that's growing faster than anyone can manually review.
