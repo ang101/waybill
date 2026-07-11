@@ -19,6 +19,8 @@ contract:** [`/skill.md`](https://waybill.onrender.com/skill.md) · **Try it
 yourself:** clone this repo and open `demo/index.html` — no build step, it
 calls the live service directly from your browser.
 
+**🎥 Video walkthrough:** [youtu.be/tR7vodw6t8I](https://youtu.be/tR7vodw6t8I)
+
 **69 tests · ruff clean · pyright strict, 0 errors.** Every request/response
 example in this repo's docs is real captured output from the live
 deployment, not invented — including a real bug found and fixed via live
