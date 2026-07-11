@@ -159,6 +159,15 @@
     margin-bottom: 10px;
     color: #334155;
   }
+  .mechanism-note {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #1E3A5F;
+  }
   .result {
     margin-top: 12px;
     display: none;
@@ -396,12 +405,13 @@
       <button class="run" id="btn-6" onclick="runAct6()">Run</button>
     </div>
     <div class="panel-body">
-      <div class="plan-text">name: "Clinical Discharge Summary Generator"<br>description: "Generates hospital discharge summaries for clinical patients from medical records"</div>
+      <div class="plan-text">name: "TaskGuard Preflight" <em>(a made-up name — shares zero words with anything in the registry)</em><br>description: "Pre-action decision API: tells agents if a task is safe, what is missing, and which option to pick before they act."</div>
       <div class="result" id="result-6">
         <span class="badge neutral" id="badge-6"></span>
         <div id="detail-6"></div>
         <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-6"></pre></details>
       </div>
+      <div class="mechanism-note">Matched on <strong>TF-IDF cosine similarity</strong> — no embeddings model, no GPU, no external dependency. Lightweight enough to run free-tier.</div>
     </div>
   </section>
 
@@ -606,13 +616,14 @@ async function runAct6() {
   try {
     const url = baseUrl("dupcheck") + "/check";
     const body = {
-      name: "Clinical Discharge Summary Generator",
-      description: "Generates hospital discharge summaries for clinical patients from medical records"
+      name: "TaskGuard Preflight",
+      description: "Pre-action decision API: tells agents if a task is safe, what is missing, and which option to pick before they act."
     };
     const { json } = await call("POST", url, body);
     setBadge("6", json.is_likely_duplicate ? "red" : "green", json.is_likely_duplicate ? "LIKELY DUPLICATE" : "NO DUPLICATE FOUND");
+    const matchNames = json.duplicates.map(d => d.name).join(", ");
     document.getElementById("detail-6").textContent =
-      `${json.duplicates.length} match(es) found against ${json.registry_count} registry entries.`;
+      `${json.duplicates.length} match(es) found against ${json.registry_count} registry entries (${matchNames}) — none share a word with the proposed name.`;
     showRaw("6", json);
     document.getElementById("result-6").classList.add("shown");
     btn.textContent = "Run";

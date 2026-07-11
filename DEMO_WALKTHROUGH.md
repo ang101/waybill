@@ -140,11 +140,15 @@ deleted.
 | 0:00 – 0:20 | Opening slide | Stakes |
 | 0:20 – 0:50 | Demo UI — plan text + naive-accept echo | Failure |
 | 0:50 – 1:45 | Demo UI — panels 1-5, clicked in order | Defense |
-| 1:45 – 2:13 | Demo UI — panel 6 (dupcheck) | How it fits |
-| 2:13 – 2:23 | Transition to closing slide | Scope |
-| 2:23 – 2:37 | Closing slide | Impact / close |
+| 1:45 – 2:25 | Demo UI — panel 6 (dupcheck) | How it fits |
+| 2:25 – 2:35 | Transition to closing slide | Scope |
+| 2:35 – 2:49 | Closing slide | Impact / close |
 
-Totals to ≈2:37, leaving real margin under the 3:00 cap.
+Totals to ≈2:49, leaving a thinner but real margin under the 3:00 cap —
+the How-it-fits beat runs longer (~40s) than a bare-minimum version would,
+because it now names the mechanism (TF-IDF) and its efficiency tradeoff
+on camera rather than leaving that only in the docs. If recording runs
+long, this is the beat to trim first.
 
 ### Opening slide (~20s)
 
@@ -203,24 +207,25 @@ Open the demo UI (`waybill/demo/index.html`) and click through panels 1-5
 continuous terminal session instead, narrating over the same five points as
 they print.
 
-### How it fits beat (~28s)
+### How it fits beat (~40s)
 
 Click **Panel 6 — Duplicate-Skill Checker** in the demo UI:
 
 > "Waybill builds on nothing exotic — the same skill.md and HTTP convention
-> every town skill already uses. What's new is what other agents can now
-> rely on: any orchestrator or subagent can GET this contract and validate
-> before acting. Its sibling, the Duplicate-Skill Checker, applies the same
-> idea to the registry itself" *(panel 6 result renders)* "— catching
-> duplicates like this real four-way clinical-discharge cluster. We needed
-> this ourselves: our own Step 1 PR was closed as a duplicate we didn't know
-> existed."
+> every town skill already uses. What's new is what other agents can rely
+> on: any orchestrator can GET this contract and validate before acting.
+> Its sibling, the Duplicate-Skill Checker, applies the same idea to the
+> registry" *(panel 6 result renders)* "— I typed a made-up name, 'TaskGuard
+> Preflight,' and it still caught two real matches, AgentCheckpoint and
+> AgentGate, purely on function, via TF-IDF — lightweight, no embeddings
+> model, free-tier friendly. We needed this ourselves: our own Step 1 PR
+> was closed as a duplicate we didn't know existed."
 
 **Fallback**:
 ```bash
 curl -s --ssl-no-revoke -X POST https://dupcheck.onrender.com/check \
   -H "Content-Type: application/json" \
-  -d '{"name": "Clinical Discharge Summary Generator", "description": "Generates hospital discharge summaries for clinical patients from medical records"}'
+  -d '{"name": "TaskGuard Preflight", "description": "Pre-action decision API: tells agents if a task is safe, what is missing, and which option to pick before they act."}'
 ```
 
 ### Scope beat (~10s)
