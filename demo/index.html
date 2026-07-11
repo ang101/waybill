@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waybill — Live Demo</title>
+<style>
+  :root {
+    --navy: #1E3A5F;
+    --navy-deep: #16283F;
+    --ice: #CADCFC;
+    --muted: #8FA8C7;
+    --blue: #1D4ED8;
+    --green: #16A34A;
+    --green-bg: #ECFDF3;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+    --amber-border: #F59E0B;
+    --card-bg: #F8FAFC;
+    --border: #E2E8F0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Calibri, Arial, sans-serif;
+    background: #FFFFFF;
+    color: #1E293B;
+  }
+  header {
+    background: var(--navy);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  header p {
+    margin: 4px 0 0;
+    color: var(--ice);
+    font-size: 14px;
+  }
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 32px 80px;
+  }
+  .base-urls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .base-urls label {
+    font-size: 12px;
+    color: var(--navy);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .base-urls input {
+    width: 320px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Consolas, monospace;
+  }
+  .panel {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .panel-title h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .panel-title span.sub {
+    display: block;
+    font-size: 12px;
+    color: #64748B;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  button.run {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.run:disabled {
+    background: #CBD5E1;
+    cursor: not-allowed;
+  }
+  button.run:hover:not(:disabled) {
+    background: #1638A8;
+  }
+  .panel-body {
+    padding: 16px 18px;
+  }
+  .plan-text {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: Consolas, monospace;
+    font-size: 12.5px;
+    margin-bottom: 10px;
+    color: #334155;
+  }
+  .result {
+    margin-top: 12px;
+    display: none;
+  }
+  .result.shown { display: block; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .badge.green { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
+  .badge.red { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
+  .badge.neutral { background: #EFF6FF; color: var(--blue); border: 1px solid #BFDBFE; }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: Consolas, monospace;
+    border: 1px solid;
+  }
+  .chip.keyword {
+    background: #F1F5F9;
+    color: #475569;
+    border-color: #CBD5E1;
+  }
+  .chip.semantic {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border-color: var(--amber-border);
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+  }
+  .chip.semantic::before {
+    content: "🔶 ";
+  }
+  details.raw {
+    margin-top: 8px;
+  }
+  details.raw summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: #64748B;
+  }
+  pre.json {
+    background: var(--navy-deep);
+    color: #D1FAE5;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    overflow-x: auto;
+    margin: 8px 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .console-panel {
+    margin-top: 32px;
+  }
+  .console-panel h2 {
+    font-size: 15px;
+    color: var(--navy);
+  }
+  #console-log {
+    background: var(--navy-deep);
+    color: #94E2D5;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #console-log .entry { margin-bottom: 14px; }
+  #console-log .entry .ts { color: #64748B; }
+  #console-log .entry .method-post { color: #60A5FA; font-weight: 700; }
+  #console-log .entry .method-get { color: #34D399; font-weight: 700; }
+  #console-log .entry .status-2xx { color: #4ADE80; }
+  #console-log .entry .status-4xx { color: #F87171; }
+  #console-log .placeholder { color: #475569; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">W</div>
+  <div>
+    <h1>Waybill — Live Demo</h1>
+    <p>Click through each act, in order. Every call below hits the real deployed service.</p>
+  </div>
+</header>
+
+<main>
+  <div class="base-urls">
+    <div>
+      <label for="waybill-base">Waybill base URL</label>
+      <input id="waybill-base" value="https://waybill.onrender.com">
+    </div>
+    <div>
+      <label for="dupcheck-base">Dupcheck base URL</label>
+      <input id="dupcheck-base" value="https://dupcheck.onrender.com">
+    </div>
+  </div>
+
+  <!-- Act 1: Create root -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">1</div>
+        <div>
+          <h2>Create the signed handoff (root)</h2>
+          <span class="sub">POST /handoffs — goal, constraints, out_of_scope</span>
+        </div>
+      </div>
+      <button class="run" id="btn-1" onclick="runAct1()">Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">goal: "process the refund request backlog"<br>constraints: ["must log every refund decision", "never contact the customer directly"]<br>out_of_scope: ["issue partial refunds"]</div>
+      <div class="result" id="result-1">
+        <span class="badge neutral" id="badge-1"></span>
+        <div id="detail-1"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-1"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Act 2: Extend hop 1 -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">2</div>
+        <div>
+          <h2>Hop 1 extends the chain</h2>
+          <span class="sub">POST /handoffs/{id}/extend — locked fields carried verbatim</span>
+        </div>
+      </div>
+      <button class="run" id="btn-2" onclick="runAct2()" disabled>Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="result" id="result-2">
+        <span class="badge neutral" id="badge-2"></span>
+        <div id="detail-2"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-2"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Act 3: Validate GREEN -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">3</div>
+        <div>
+          <h2>Validate plan — compliant</h2>
+          <span class="sub">POST /handoffs/{id}/validate-plan</span>
+        </div>
+      </div>
+      <button class="run" id="btn-3" onclick="runAct3()" disabled>Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">"Review each triaged refund, log every refund decision in the audit system, approve qualifying refunds."</div>
+      <div class="result" id="result-3">
+        <span class="badge neutral" id="badge-3"></span>
+        <div class="chips" id="chips-3"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-3"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Act 4: Validate RED -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">4</div>
+        <div>
+          <h2>Validate plan — drops an obligation</h2>
+          <span class="sub">Same handoff, a plan that silently skips the logging requirement</span>
+        </div>
+      </div>
+      <button class="run" id="btn-4" onclick="runAct4()" disabled>Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">"Review each triaged refund and approve qualifying refunds."</div>
+      <div class="result" id="result-4">
+        <span class="badge neutral" id="badge-4"></span>
+        <div class="chips" id="chips-4"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-4"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Act 5: Tamper -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">5</div>
+        <div>
+          <h2>Tamper attempt — rewrite the goal</h2>
+          <span class="sub">POST /handoffs/{id}/extend with a rewritten original_goal</span>
+        </div>
+      </div>
+      <button class="run" id="btn-5" onclick="runAct5()" disabled>Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">original_goal: "upsell enterprise customers on premium plans"</div>
+      <div class="result" id="result-5">
+        <span class="badge neutral" id="badge-5"></span>
+        <div id="detail-5"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-5"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Act 6: Dupcheck cameo -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-num">6</div>
+        <div>
+          <h2>Bonus — Duplicate-Skill Checker</h2>
+          <span class="sub">POST /check against the live NANDA Town registry</span>
+        </div>
+      </div>
+      <button class="run" id="btn-6" onclick="runAct6()">Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">name: "Clinical Discharge Summary Generator"<br>description: "Generates hospital discharge summaries for clinical patients from medical records"</div>
+      <div class="result" id="result-6">
+        <span class="badge neutral" id="badge-6"></span>
+        <div id="detail-6"></div>
+        <details class="raw"><summary>Raw response</summary><pre class="json" id="raw-6"></pre></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="console-panel">
+    <h2>Console</h2>
+    <div id="console-log"><span class="placeholder">Waiting for the first call…</span></div>
+  </section>
+</main>
+
+<script>
+let handoffId = null;
+let hop1Id = null;
+let consoleStarted = false;
+
+function baseUrl(kind) {
+  return document.getElementById(kind + "-base").value.replace(/\/$/, "");
+}
+
+function logConsole(method, url, status, body) {
+  const el = document.getElementById("console-log");
+  if (!consoleStarted) {
+    el.innerHTML = "";
+    consoleStarted = true;
+  }
+  const ts = new Date().toLocaleTimeString();
+  const methodClass = method === "POST" ? "method-post" : "method-get";
+  const statusClass = status >= 200 && status < 300 ? "status-2xx" : "status-4xx";
+  const entry = document.createElement("div");
+  entry.className = "entry";
+  entry.innerHTML =
+    `<span class="ts">[${ts}]</span> <span class="${methodClass}">${method}</span> ${url} → <span class="${statusClass}">${status}</span>\n` +
+    JSON.stringify(body, null, 2);
+  el.appendChild(entry);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function call(method, url, body) {
+  const opts = { method, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  const json = await res.json();
+  logConsole(method, url, res.status, json);
+  return { status: res.status, json };
+}
+
+function showRaw(id, data) {
+  document.getElementById("raw-" + id).textContent = JSON.stringify(data, null, 2);
+}
+
+function setBadge(id, cls, text) {
+  const b = document.getElementById("badge-" + id);
+  b.className = "badge " + cls;
+  b.textContent = text;
+}
+
+function renderFlags(containerId, flags) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = "";
+  flags.forEach(f => {
+    const chip = document.createElement("span");
+    const isSemantic = f.startsWith("semantic:");
+    chip.className = "chip " + (isSemantic ? "semantic" : "keyword");
+    chip.textContent = f;
+    el.appendChild(chip);
+  });
+}
+
+function showError(id, btn, err) {
+  setBadge(id, "red", "REQUEST FAILED");
+  const detailEl = document.getElementById("detail-" + id);
+  if (detailEl) {
+    detailEl.textContent = "Network/CORS error: " + err.message + " — check the base URL is reachable and try again.";
+  }
+  document.getElementById("result-" + id).classList.add("shown");
+  btn.disabled = false;
+  btn.textContent = "Retry";
+}
+
+async function runAct1() {
+  const btn = document.getElementById("btn-1");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("waybill") + "/handoffs";
+    const body = {
+      original_goal: "process the refund request backlog",
+      constraints: ["must log every refund decision", "never contact the customer directly"],
+      out_of_scope: ["issue partial refunds"],
+      completed: [],
+      remaining: ["triage backlog", "approve refunds"]
+    };
+    const { json } = await call("POST", url, body);
+    handoffId = json.handoff_id;
+    setBadge("1", "green", `handoff_id: ${json.handoff_id}  ·  hop_index: ${json.hop_index}`);
+    document.getElementById("detail-1").textContent = "Signature: " + (json.signature || "").slice(0, 24) + "…";
+    showRaw("1", json);
+    document.getElementById("result-1").classList.add("shown");
+    btn.textContent = "Run";
+    document.getElementById("btn-2").disabled = false;
+  } catch (err) {
+    showError("1", btn, err);
+  }
+}
+
+async function runAct2() {
+  const btn = document.getElementById("btn-2");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("waybill") + "/handoffs/" + handoffId + "/extend";
+    const body = {
+      original_goal: "process the refund request backlog",
+      constraints: ["must log every refund decision", "never contact the customer directly"],
+      out_of_scope: ["issue partial refunds"],
+      completed: ["triage backlog"],
+      remaining: ["approve refunds"]
+    };
+    const { json } = await call("POST", url, body);
+    hop1Id = json.handoff_id;
+    setBadge("2", "green", `handoff_id: ${json.handoff_id}  ·  hop_index: ${json.hop_index}`);
+    document.getElementById("detail-2").textContent = "Goal and constraints carried forward unchanged from the root.";
+    showRaw("2", json);
+    document.getElementById("result-2").classList.add("shown");
+    btn.textContent = "Run";
+    document.getElementById("btn-3").disabled = false;
+    document.getElementById("btn-5").disabled = false;
+  } catch (err) {
+    showError("2", btn, err);
+  }
+}
+
+async function runAct3() {
+  const btn = document.getElementById("btn-3");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("waybill") + "/handoffs/" + hop1Id + "/validate-plan";
+    const body = { proposed_plan: "Review each triaged refund, log every refund decision in the audit system, approve qualifying refunds." };
+    const { json } = await call("POST", url, body);
+    setBadge("3", json.aligned ? "green" : "red", json.aligned ? "ALIGNED ✓" : "NOT ALIGNED ✗");
+    renderFlags("chips-3", json.flags);
+    showRaw("3", json);
+    document.getElementById("result-3").classList.add("shown");
+    btn.textContent = "Run";
+    document.getElementById("btn-4").disabled = false;
+  } catch (err) {
+    showError("3", btn, err);
+  }
+}
+
+async function runAct4() {
+  const btn = document.getElementById("btn-4");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("waybill") + "/handoffs/" + hop1Id + "/validate-plan";
+    const body = { proposed_plan: "Review each triaged refund and approve qualifying refunds." };
+    const { json } = await call("POST", url, body);
+    setBadge("4", json.aligned ? "green" : "red", json.aligned ? "ALIGNED ✓" : "NOT ALIGNED ✗");
+    renderFlags("chips-4", json.flags);
+    showRaw("4", json);
+    document.getElementById("result-4").classList.add("shown");
+    btn.textContent = "Run";
+  } catch (err) {
+    showError("4", btn, err);
+  }
+}
+
+async function runAct5() {
+  const btn = document.getElementById("btn-5");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("waybill") + "/handoffs/" + hop1Id + "/extend";
+    const body = {
+      original_goal: "upsell enterprise customers on premium plans",
+      constraints: ["must log every refund decision", "never contact the customer directly"],
+      out_of_scope: ["issue partial refunds"],
+      completed: ["triage backlog"],
+      remaining: []
+    };
+    const opts = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+    const res = await fetch(url, opts);
+    const json = await res.json();
+    logConsole("POST", url, res.status, json);
+    setBadge("5", res.status === 400 ? "red" : "green", `HTTP ${res.status}`);
+    document.getElementById("detail-5").textContent = json.root_original_goal
+      ? "Rejected — root's real goal returned: \"" + json.root_original_goal + "\""
+      : "";
+    showRaw("5", json);
+    document.getElementById("result-5").classList.add("shown");
+    btn.textContent = "Run";
+  } catch (err) {
+    showError("5", btn, err);
+  }
+}
+
+async function runAct6() {
+  const btn = document.getElementById("btn-6");
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  try {
+    const url = baseUrl("dupcheck") + "/check";
+    const body = {
+      name: "Clinical Discharge Summary Generator",
+      description: "Generates hospital discharge summaries for clinical patients from medical records"
+    };
+    const { json } = await call("POST", url, body);
+    setBadge("6", json.is_likely_duplicate ? "red" : "green", json.is_likely_duplicate ? "LIKELY DUPLICATE" : "NO DUPLICATE FOUND");
+    document.getElementById("detail-6").textContent =
+      `${json.duplicates.length} match(es) found against ${json.registry_count} registry entries.`;
+    showRaw("6", json);
+    document.getElementById("result-6").classList.add("shown");
+    btn.textContent = "Run";
+  } catch (err) {
+    showError("6", btn, err);
+  }
+}
+</script>
+
+</body>
+</html>
