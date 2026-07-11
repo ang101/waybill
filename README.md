@@ -14,6 +14,16 @@ Like a shipping waybill, the package travels with the task through every
 handler — and every handler is accountable for passing on exactly what it
 received.
 
+**Live:** [waybill.onrender.com](https://waybill.onrender.com) · **Agent
+contract:** [`/skill.md`](https://waybill.onrender.com/skill.md) · **Try it
+yourself:** clone this repo and open `demo/index.html` — no build step, it
+calls the live service directly from your browser.
+
+**69 tests · ruff clean · pyright strict, 0 errors.** Every request/response
+example in this repo's docs is real captured output from the live
+deployment, not invented — including a real bug found and fixed via live
+testing (see [PITCH.md](PITCH.md)).
+
 ## Why this exists
 
 When Agent A hands a task to Agent B as free text, meaning decays at every
@@ -113,15 +123,6 @@ call downgrades to the keyword verdict and says so.
   multi-tenant use.
 - **Prior-art lookup** — check whether a very similar task chain already ran
   before starting a new relay.
-
-## Design lineage
-
-Waybill applies the same invariant at the task layer that capability
-delegation applies at the auth layer: **things may only narrow as they pass
-hop to hop, never widen or silently rewrite** — and an invalidated root
-cleanly invalidates everything derived from it. See the companion NANDA Town
-Step 1 PR (`hackathon/ang101-capability-delegation`): delegatable capability
-tokens with cascading revocation.
 
 ## Companion project
 

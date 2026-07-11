@@ -116,13 +116,6 @@ Waybill is the **persistent task contract** for that lifecycle:
 Nothing else in the registry touches **relay integrity** — every existing
 trust primitive is single-hop.
 
-Waybill is also one half of a two-layer thesis, with its companion NANDA Town
-Step 1 PR ([delegatable capability tokens with cascading revocation](https://github.com/projnanda/nandatown/pull/147)):
-**things may only narrow as they pass hop to hop — never widen, never
-silently rewrite.** The PR enforces that invariant for *authority* (scopes)
-at the auth layer; Waybill enforces it for *intent* (goals/constraints) at
-the task layer.
-
 ---
 
 ## Business case
