@@ -36,13 +36,15 @@ Waybill's proof, not a plug placed before it.
    live URLs and confirm no issues surface. This is the highest-signal
    check short of a real judging run — it walks the documented contract
    endpoint by endpoint, the same way a stock agent would.
-4. **Record the defense and how-it-fits beats as ONE continuous pass through
-   the demo UI** (`waybill/demo/index.html` — see below), not stitched
-   clips. Panels 3-5 depend on the `handoff_id` created in panels 1-2 —
-   if you skip ahead or reload mid-recording, later panels will fail. If
-   you must re-take, reload the page and click through from panel 1 again.
-   `scripts/demo.sh` remains the scripted fallback (see the Fallback
-   subsection under each beat) if the UI has a problem on the day.
+4. **Record the failure, defense, and how-it-fits beats as ONE continuous
+   pass through the demo UI** (`waybill/demo/index.html` — see below), not
+   stitched clips. The entire live-terminal-free demo now happens on this
+   one page, baseline box through Panel 6. Panels 3-5 depend on the
+   `handoff_id` created in panels 1-2 — if you skip ahead or reload
+   mid-recording, later panels will fail. If you must re-take, reload the
+   page and click through from the baseline box again. `scripts/demo.sh`
+   remains the scripted fallback (see the Fallback subsection under each
+   beat) if the UI has a problem on the day.
 5. Have a **pre-recorded terminal capture ready as a fallback** — if a dyno
    restarts mid-recording despite the keepalive, don't burn recording time
    debugging live; cut to the fallback clip and re-run for real afterward if
@@ -162,29 +164,33 @@ long, this is the beat to trim first.
 
 ### Failure beat (~30s)
 
-Show the plan text on screen (type it or have it pre-typed and just reveal
-it), then **actually run something** to make the bad outcome visible rather
-than only asserted — the rubric wants the failure *shown happening*, not
-narrated:
+Entirely inside the demo UI — no terminal switch. The demo UI has a
+dashed, muted "BEFORE WAYBILL — no check in place" box above Panel 1;
+click its Run button to make the bad outcome visible rather than only
+asserted — the rubric wants the failure *shown happening*, not narrated:
 
 > "Here's a real handoff: a refund-processing task with two constraints —
 > log every decision, and never contact the customer directly. Say an agent
-> two hops downstream proposes this plan" *(show plan text)* "'Review each
-> triaged refund and approve qualifying refunds.' It never mentions logging.
-> Watch what happens with no check in place." *(type and run:
-> `echo "Plan approved. Task marked complete."`)* "Nothing catches it. It
-> just runs."
+> two hops downstream proposes this plan" *(point at the box's plan text)*
+> "'Review each triaged refund and approve qualifying refunds.' It never
+> mentions logging. Watch what happens with no check in place." *(click the
+> baseline box's Run button)* "Nothing catches it. It just runs."
 
-The plan text to show: `Review each triaged refund and approve qualifying
-refunds.` — this is the exact plan reused in the Defense beat's Panel 4,
-deliberately, for the before/after. The `echo` line is an obvious narrated
-stand-in for "no check exists," not a real competing system — it turns the
-claim into something the viewer watches happen.
+The plan text in the baseline box: `Review each triaged refund and approve
+qualifying refunds.` — this is the exact plan reused in the Defense beat's
+Panel 4, deliberately, for the before/after. The baseline box's button
+makes no network call — it's an obvious narrated stand-in for "no check
+exists," not a real competing system, kept entirely inside the demo UI
+rather than switching to a terminal — it turns the claim into something
+the viewer watches happen without ever leaving the page.
 
 ### Defense beat (~55s)
 
-Open the demo UI (`waybill/demo/index.html`) and click through panels 1-5
-**in order, one at a time**, narrating over each response as it renders:
+Continuing in the demo UI (`waybill/demo/index.html`) — click through
+panels 1-5 **in order, one at a time**, narrating over each response as
+it renders. This is the first click on any of the *numbered* panels; the
+baseline box above them is deliberately unnumbered and separate from this
+sequence:
 
 1. **Panel 1 — Create handoff** — "This is Waybill. The coordinator creates
    a signed handoff — goal, constraints, out-of-scope — as a real API
@@ -265,11 +271,11 @@ are stage directions, not spoken words.
 >
 > Here's a real handoff: a refund-processing task with two constraints —
 > log every decision, and never contact the customer directly. Say an
-> agent two hops downstream proposes this plan: [show plan text] "Review
-> each triaged refund and approve qualifying refunds." It never mentions
-> logging. Watch what happens with no check in place. [type and run:
-> `echo "Plan approved. Task marked complete."`] Nothing catches it. It
-> just runs.
+> agent two hops downstream proposes this plan: [point at the "BEFORE
+> WAYBILL" box's plan text] "Review each triaged refund and approve
+> qualifying refunds." It never mentions logging. Watch what happens with
+> no check in place. [click the baseline box's Run button] Nothing catches
+> it. It just runs.
 >
 > This is Waybill. The coordinator creates a signed handoff — goal,
 > constraints, out-of-scope — as a real API call. [click Panel 1] Hop one

@@ -91,6 +91,51 @@
     margin-bottom: 16px;
     overflow: hidden;
   }
+  .baseline-panel {
+    border: 1px dashed #CBD5E1;
+    border-radius: 10px;
+    background: #F1F5F9;
+    margin-bottom: 20px;
+    overflow: hidden;
+    opacity: 0.9;
+  }
+  .baseline-panel .panel-head {
+    padding: 14px 18px;
+    border-bottom: 1px dashed #CBD5E1;
+  }
+  .baseline-panel h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748B;
+  }
+  .baseline-panel .sub {
+    display: block;
+    font-size: 12px;
+    color: #94A3B8;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .baseline-panel button.run {
+    background: #64748B;
+  }
+  .baseline-panel button.run:hover:not(:disabled) {
+    background: #475569;
+  }
+  .baseline-result {
+    margin-top: 12px;
+    display: none;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    color: #166534;
+  }
+  .baseline-result.shown { display: block; }
+  .baseline-caption {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: #94A3B8;
+    font-style: italic;
+  }
   .panel-head {
     display: flex;
     align-items: center;
@@ -282,6 +327,24 @@
       <input id="dupcheck-base" value="https://dupcheck.onrender.com">
     </div>
   </div>
+
+  <!-- Baseline: no check in place (illustrative, not a real system) -->
+  <section class="baseline-panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div>
+          <h2>BEFORE WAYBILL — no check in place</h2>
+          <span class="sub">What happens today, with nothing validating the handoff</span>
+        </div>
+      </div>
+      <button class="run" id="btn-baseline" onclick="runBaseline()">Run</button>
+    </div>
+    <div class="panel-body">
+      <div class="plan-text">"Review each triaged refund and approve qualifying refunds."</div>
+      <div class="baseline-result" id="result-baseline">✅ Plan approved. Task marked complete.</div>
+      <div class="baseline-caption">This button makes no network call — nothing here actually checks anything. That's the point: without Waybill, a plan like this just runs.</div>
+    </div>
+  </section>
 
   <!-- Act 1: Create root -->
   <section class="panel">
@@ -488,6 +551,14 @@ function showError(id, btn, err) {
   document.getElementById("result-" + id).classList.add("shown");
   btn.disabled = false;
   btn.textContent = "Retry";
+}
+
+function runBaseline() {
+  // Deliberately client-side only, no fetch — this button represents the
+  // absence of a check, so there is nothing to call. Purely illustrative.
+  document.getElementById("result-baseline").classList.add("shown");
+  document.getElementById("btn-baseline").textContent = "Ran (no check)";
+  document.getElementById("btn-baseline").disabled = true;
 }
 
 async function runAct1() {
