@@ -162,3 +162,7 @@ class TestInspectionEndpoints:
         assert body["status"] == "ok"
         assert body["signing"] in {"seeded", "ephemeral"}
         assert body["semantic_check"] in {"configured", "disabled"}
+
+    def test_cors_header_present_on_response(self, client: TestClient) -> None:
+        response = client.get("/health", headers={"Origin": "https://example.com"})
+        assert response.headers["access-control-allow-origin"] == "*"

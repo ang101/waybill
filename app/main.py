@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from app.alignment import evaluate_alignment, normalize_proposed_plan
@@ -70,6 +71,16 @@ app = FastAPI(
         "constraints, and scope creep when work passes through multiple agents."
     ),
     version="0.1.0",
+)
+
+# All endpoints are already public and unauthenticated (see SKILL.md); this
+# only lets browser-based callers (e.g. the demo UI) receive responses they
+# could already fetch with curl — it grants no new access.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 
